@@ -1,0 +1,20 @@
+name: Save planning JSON
+
+on:
+  push:
+    paths:
+      - 'planning.json'
+
+jobs:
+  commit-json:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Commit updated JSON
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add planning.json
+          git commit -m "📝 Mise à jour automatique du planning" || echo "Aucun changement"
+          git push
