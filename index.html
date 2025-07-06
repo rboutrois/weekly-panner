@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Planning Hebdo</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <style>
     body {
       font-family: sans-serif;
@@ -13,12 +13,10 @@
       max-width: 600px;
       margin: auto;
     }
-
     h1 {
       text-align: center;
       margin-bottom: 1rem;
     }
-
     .day-row {
       display: flex;
       align-items: center;
@@ -29,13 +27,11 @@
       margin-bottom: 0.5rem;
       transition: background 0.3s ease;
     }
-
     .day-label {
       width: 100px;
       font-weight: bold;
       padding-left: 10px;
     }
-
     .slots button {
       font-size: 1.2rem;
       background: none;
@@ -46,23 +42,19 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-
     .slots button.active {
       border-color: #000;
       color: white;
     }
-
-    .morning { background-color: #FFD580; }   /* Jaune clair */
-    .evening { background-color: #FFA07A; }   /* Saumon */
-    .night   { background-color: #8FA8F7; }   /* Bleu doux */
-    .off     { background-color: #C0C0C0; }   /* Gris */
-
+    .morning { background-color: #FFD580; }
+    .evening { background-color: #FFA07A; }
+    .night   { background-color: #8FA8F7; }
+    .off     { background-color: #C0C0C0; }
     .buttons {
       display: flex;
       justify-content: space-around;
       margin-top: 1.5rem;
     }
-
     .buttons button {
       padding: 0.5rem 1rem;
       font-size: 1rem;
@@ -73,48 +65,38 @@
   </style>
 </head>
 <body>
-
   <h1 id="week-title">Semaine du ...</h1>
-
   <div id="planning"></div>
-
   <div class="buttons">
-    <button onclick="applyTrame('A')">Trame A</button>
-    <button onclick="applyTrame('B')">Trame B</button>
-    <button onclick="clearPlanning()">Effacer</button>
+    <button id="trameA">Trame A</button>
+    <button id="trameB">Trame B</button>
+    <button id="clear">Effacer</button>
   </div>
 
-<script type="module">
-    // Import the functions you need from the SDKs you need
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBdYIkf9FZNPnCB099D5yllywSRSTvEAS4",
       authDomain: "weeklyplanner-64c25.firebaseapp.com",
       databaseURL: "https://weeklyplanner-64c25-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "weeklyplanner-64c25",
-      storageBucket: "weeklyplanner-64c25.firebasestorage.app",
+      storageBucket: "weeklyplanner-64c25.appspot.com",
       messagingSenderId: "598034512305",
       appId: "1:598034512305:web:36dd6e429cc5458444a590"
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);    
-    const db = getDatabase(app);    
-    
-    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
     const slots = [
       { key: "M", emoji: "🌅", className: "morning" },
       { key: "S", emoji: "🌇", className: "evening" },
       { key: "N", emoji: "🌙", className: "night" },
       { key: "O", emoji: "💤", className: "off" }
     ];
-
     const trames = {
       A: ["S", "O", "O", "S", "S", "O", "O"],
       B: ["O", "S", "S", "O", "O", "S", "S"]
@@ -130,7 +112,6 @@
       monday.setDate(today.getDate() + mondayOffset);
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-
       const format = d => d.toLocaleDateString("fr-FR", { day: '2-digit', month: '2-digit' });
       return `Semaine du ${format(monday)} au ${format(sunday)}`;
     }
@@ -158,8 +139,8 @@
         slots.forEach(slot => {
           const btn = document.createElement("button");
           btn.textContent = slot.emoji;
-          btn.onclick = () => selectSlot(i, slot.key);
           btn.dataset.key = slot.key;
+          btn.addEventListener("click", () => selectSlot(i, slot.key));
           btnGroup.appendChild(btn);
         });
 
@@ -168,12 +149,6 @@
       });
 
       updateUI();
-    }
-
-    function selectSlot(dayIndex, key) {
-      planning[dayIndex] = key;
-      updateUI();
-      savePlanning();
     }
 
     function updateUI() {
@@ -192,6 +167,12 @@
       });
     }
 
+    function selectSlot(dayIndex, key) {
+      planning[dayIndex] = key;
+      updateUI();
+      savePlanning();
+    }
+
     function applyTrame(letter) {
       planning = [...trames[letter]];
       updateUI();
@@ -199,43 +180,38 @@
     }
 
     function clearPlanning() {
-      planning = Array(7).fill("O");
-      updateUI();
-      savePlanning();
+      if (confirm("Voulez-vous vraiment effacer le planning ?")) {
+        planning = Array(7).fill("O");
+        updateUI();
+        savePlanning();
+      }
     }
 
     async function savePlanning() {
       try {
         await set(ref(db, "planning"), planning);
-        localStorage.setItem("planning", JSON.stringify(planning)); // backup local
+        localStorage.setItem("planning", JSON.stringify(planning));
       } catch (error) {
-        console.error("Erreur lors de la sauvegarde Firebase :", error);
+        console.error("Erreur de sauvegarde Firebase :", error);
       }
     }
 
-    async function loadPlanning() {
-      try {
-        const snapshot = await get(ref(db, "planning"));
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          if (Array.isArray(data) && data.length === 7) {
-            planning = data;
-            return;
-          }
+    function startRealtimeListener() {
+      const planningRef = ref(db, "planning");
+      onValue(planningRef, (snapshot) => {
+        const data = snapshot.val();
+        if (Array.isArray(data) && data.length === 7) {
+          planning = data;
+          updateUI();
         }
-        throw new Error("Planning Firebase invalide");
-      } catch (error) {
-        console.warn("Chargement Firebase échoué :", error);
-        const stored = localStorage.getItem("planning");
-        if (stored) planning = JSON.parse(stored);
-      }
+      });
     }
 
     function askAccessCode() {
       const storedCode = localStorage.getItem("access_code_ok");
       if (storedCode === "yes") return;
 
-      let code = prompt("Entrez le code à 4 chiffres pour accéder au planning :");
+      const code = prompt("Entrez le code à 4 chiffres pour accéder au planning :");
       if (code === "1234") {
         localStorage.setItem("access_code_ok", "yes");
       } else {
@@ -246,14 +222,14 @@
 
     async function init() {
       askAccessCode();
-      await loadPlanning();
       setWeekTitle();
       createPlanningUI();
-    }
+      startRealtimeListener();
 
-    window.applyTrame = applyTrame;
-    window.clearPlanning = clearPlanning;
-    window.selectSlot = selectSlot;
+      document.getElementById("trameA").addEventListener("click", () => applyTrame("A"));
+      document.getElementById("trameB").addEventListener("click", () => applyTrame("B"));
+      document.getElementById("clear").addEventListener("click", clearPlanning);
+    }
 
     init();
   </script>
