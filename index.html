@@ -73,6 +73,7 @@
   </style>
 </head>
 <body>
+
   <h1 id="week-title">Semaine du ...</h1>
 
   <div id="planning"></div>
@@ -83,16 +84,29 @@
     <button onclick="clearPlanning()">Effacer</button>
   </div>
 
-  <script>
-    const days = [
-      "Lundi",
-      "Mardi",
-      "Mercredi",
-      "Jeudi",
-      "Vendredi",
-      "Samedi",
-      "Dimanche"
-    ];
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBdYIkf9FZNPnCB099D5yllywSRSTvEAS4",
+      authDomain: "weeklyplanner-64c25.firebaseapp.com",
+      databaseURL: "https://weeklyplanner-64c25-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "weeklyplanner-64c25",
+      storageBucket: "weeklyplanner-64c25.firebasestorage.app",
+      messagingSenderId: "598034512305",
+      appId: "1:598034512305:web:36dd6e429cc5458444a590"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);    
+    const db = getDatabase(app);    
+    
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
     const slots = [
       { key: "M", emoji: "🌅", className: "morning" },
@@ -174,7 +188,6 @@
         });
 
         const bgClass = slots.find(s => s.key === selectedKey)?.className;
-        row.style.background = bgClass ? getComputedStyle(document.documentElement).getPropertyValue(`--${bgClass}`) : "#e0e0e0";
         row.className = `day-row ${bgClass}`;
       });
     }
@@ -191,19 +204,260 @@
       savePlanning();
     }
 
-    function savePlanning() {
-      localStorage.setItem("planning", JSON.stringify(planning));
+    async function savePlanning() {
+      try {
+        await set(ref(db, "planning"), planning);
+        localStorage.setItem("planning", JSON.stringify(planning)); // backup local
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde Firebase :", error);
+      }
+    }
 
-      fetch("planning.json", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planning })
+    async function loadPlanning() {
+      try {
+        const snapshot = await get(ref(db, "planning"));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (Array.isArray(data) && data.length === 7) {
+            planning = data;
+            return;
+          }
+        }
+        throw new Error("Planning Firebase invalide");
+      } catch (error) {
+        console.warn("Chargement Firebase échoué :", error);
+        const stored = localStorage.getItem("planning");
+        if (stored) planning = JSON.parse(stored);<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Hebdo</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      background: #f4f4f4;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .day-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #e0e0e0;
+      border-radius: 10px;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: background 0.3s ease;
+    }
+
+    .day-label {
+      width: 100px;
+      font-weight: bold;
+      padding-left: 10px;
+    }
+
+    .slots button {
+      font-size: 1.2rem;
+      background: none;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      margin-left: 0.2rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .slots button.active {
+      border-color: #000;
+      color: white;
+    }
+
+    .morning { background-color: #FFD580; }   /* Jaune clair */
+    .evening { background-color: #FFA07A; }   /* Saumon */
+    .night   { background-color: #8FA8F7; }   /* Bleu doux */
+    .off     { background-color: #C0C0C0; }   /* Gris */
+
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 1.5rem;
+    }
+
+    .buttons button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="week-title">Semaine du ...</h1>
+
+  <div id="planning"></div>
+
+  <div class="buttons">
+    <button onclick="applyTrame('A')">Trame A</button>
+    <button onclick="applyTrame('B')">Trame B</button>
+    <button onclick="clearPlanning()">Effacer</button>
+  </div>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBdYIkf9FZNPnCB099D5yllywSRSTvEAS4",
+      authDomain: "weeklyplanner-64c25.firebaseapp.com",
+      databaseURL: "https://weeklyplanner-64c25-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "weeklyplanner-64c25",
+      storageBucket: "weeklyplanner-64c25.firebasestorage.app",
+      messagingSenderId: "598034512305",
+      appId: "1:598034512305:web:36dd6e429cc5458444a590"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);    
+    const db = getDatabase(app);    
+    
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+    const slots = [
+      { key: "M", emoji: "🌅", className: "morning" },
+      { key: "S", emoji: "🌇", className: "evening" },
+      { key: "N", emoji: "🌙", className: "night" },
+      { key: "O", emoji: "💤", className: "off" }
+    ];
+
+    const trames = {
+      A: ["S", "O", "O", "S", "S", "O", "O"],
+      B: ["O", "S", "S", "O", "O", "S", "S"]
+    };
+
+    let planning = Array(7).fill("O");
+
+    function getWeekRange() {
+      const today = new Date();
+      const dayOfWeek = today.getDay();
+      const mondayOffset = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + mondayOffset);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+
+      const format = d => d.toLocaleDateString("fr-FR", { day: '2-digit', month: '2-digit' });
+      return `Semaine du ${format(monday)} au ${format(sunday)}`;
+    }
+
+    function setWeekTitle() {
+      document.getElementById("week-title").textContent = getWeekRange();
+    }
+
+    function createPlanningUI() {
+      const container = document.getElementById("planning");
+      container.innerHTML = "";
+      days.forEach((day, i) => {
+        const row = document.createElement("div");
+        row.className = "day-row";
+        row.dataset.index = i;
+
+        const label = document.createElement("div");
+        label.className = "day-label";
+        label.textContent = day;
+        row.appendChild(label);
+
+        const btnGroup = document.createElement("div");
+        btnGroup.className = "slots";
+
+        slots.forEach(slot => {
+          const btn = document.createElement("button");
+          btn.textContent = slot.emoji;
+          btn.onclick = () => selectSlot(i, slot.key);
+          btn.dataset.key = slot.key;
+          btnGroup.appendChild(btn);
+        });
+
+        row.appendChild(btnGroup);
+        container.appendChild(row);
+      });
+
+      updateUI();
+    }
+
+    function selectSlot(dayIndex, key) {
+      planning[dayIndex] = key;
+      updateUI();
+      savePlanning();
+    }
+
+    function updateUI() {
+      document.querySelectorAll(".day-row").forEach((row, i) => {
+        const selectedKey = planning[i];
+        const slotButtons = row.querySelectorAll("button");
+        slotButtons.forEach(btn => {
+          btn.classList.remove("active");
+          if (btn.dataset.key === selectedKey) {
+            btn.classList.add("active");
+          }
+        });
+
+        const bgClass = slots.find(s => s.key === selectedKey)?.className;
+        row.className = `day-row ${bgClass}`;
       });
     }
 
-    function loadPlanning() {
-      const stored = localStorage.getItem("planning");
-      if (stored) planning = JSON.parse(stored);
+    function applyTrame(letter) {
+      planning = [...trames[letter]];
+      updateUI();
+      savePlanning();
+    }
+
+    function clearPlanning() {
+      planning = Array(7).fill("O");
+      updateUI();
+      savePlanning();
+    }
+
+    async function savePlanning() {
+      try {
+        await set(ref(db, "planning"), planning);
+        localStorage.setItem("planning", JSON.stringify(planning)); // backup local
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde Firebase :", error);
+      }
+    }
+
+    async function loadPlanning() {
+      try {
+        const snapshot = await get(ref(db, "planning"));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (Array.isArray(data) && data.length === 7) {
+            planning = data;
+            return;
+          }
+        }
+        throw new Error("Planning Firebase invalide");
+      } catch (error) {
+        console.warn("Chargement Firebase échoué :", error);
+        const stored = localStorage.getItem("planning");
+        if (stored) planning = JSON.parse(stored);
+      }
     }
 
     function askAccessCode() {
@@ -219,10 +473,50 @@
       }
     }
 
-    askAccessCode();
-    loadPlanning();
-    setWeekTitle();
-    createPlanningUI();
+    async function init() {
+      askAccessCode();
+      await loadPlanning();
+      setWeekTitle();
+      createPlanningUI();
+    }
+
+    window.applyTrame = applyTrame;
+    window.clearPlanning = clearPlanning;
+    window.selectSlot = selectSlot;
+
+    init();
+  </script>
+</body>
+</html>
+
+      }
+    }
+
+    function askAccessCode() {
+      const storedCode = localStorage.getItem("access_code_ok");
+      if (storedCode === "yes") return;
+
+      let code = prompt("Entrez le code à 4 chiffres pour accéder au planning :");
+      if (code === "1234") {
+        localStorage.setItem("access_code_ok", "yes");
+      } else {
+        alert("Code incorrect. Rechargement de la page.");
+        location.reload();
+      }
+    }
+
+    async function init() {
+      askAccessCode();
+      await loadPlanning();
+      setWeekTitle();
+      createPlanningUI();
+    }
+
+    window.applyTrame = applyTrame;
+    window.clearPlanning = clearPlanning;
+    window.selectSlot = selectSlot;
+
+    init();
   </script>
 </body>
 </html>
