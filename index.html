@@ -4,7 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Planning Hebdo</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="icons/favicon.ico" type="image/x-icon" />
+
+  <!-- Lien vers le manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Pour iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Planning Hebdo" />
+
+  <!-- Icônes iOS -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+
   <style>
     /* Reset rapide */
     *, *::before, *::after {
@@ -208,6 +221,14 @@
       }
     }
   </style>
+
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").then(() => {
+      console.log("Service Worker registered");
+    });
+  }
+</script>
 </head>
 <body>
   <main>
