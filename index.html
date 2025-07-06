@@ -386,8 +386,8 @@
       const storedCode = localStorage.getItem("access_code_ok");
       if (storedCode === "yes") return;
 
-      const code = prompt("Entrez le code à 4 chiffres pour accéder au planning :");
-      if (code === "1234") {
+      const code = prompt("Entrez le code pour accéder au planning :");
+      if (code === "244466666") {
         localStorage.setItem("access_code_ok", "yes");
       } else {
         alert("Code incorrect. Rechargement de la page.");
