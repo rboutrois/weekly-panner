@@ -39,6 +39,7 @@
     }
 
     h2 {
+      margin-top: 0;
       text-align: center;
       color: #222;
     }
@@ -135,7 +136,7 @@
     .buttons {
       display: flex;
       justify-content: center;
-      gap: 2.5rem; /* espacement augmenté */
+      gap: 1.5rem; /* espacement augmenté */
       margin-top: 2.5rem;
       user-select: none;
     }
@@ -211,7 +212,7 @@
 <body>
   <main>
     <h1 id="title">Planning Hebdo</h1>
-    <h2 id="week-title">Semaine du ...</h2>
+    <h2 id="week-title">Du ...</h2>
     <div id="planning"></div>
     <div class="buttons">
       <button id="trameA" type="button" aria-label="Appliquer Trame A">Trame A</button>
@@ -261,7 +262,7 @@
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
       const format = d => d.toLocaleDateString("fr-FR", { day: '2-digit', month: '2-digit' });
-      return `Semaine du ${format(monday)} au ${format(sunday)}`;
+      return `Du ${format(monday)} au ${format(sunday)}`;
     }
 
     function setWeekTitle() {
